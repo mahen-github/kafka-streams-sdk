@@ -1,0 +1,32 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation "io.confluent:kafka-avro-serializer:$confluentVersion"
+    implementation "io.confluent:kafka-streams-avro-serde:$confluentVersion"
+    implementation "org.apache.kafka:kafka-clients:$kstreamsVersion"
+    implementation "org.apache.kafka:kafka-streams-test-utils:$kstreamsVersion"
+    implementation "org.apache.kafka:kafka-streams:$kstreamsVersion"
+    implementation "org.xerial.snappy:snappy-java:$snappyVersion"
+
+    implementation "org.apache.logging.log4j:log4j-api:$log4jVersion"
+    implementation "org.apache.logging.log4j:log4j-core:$log4jVersion"
+    implementation "org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion"
+
+    compileOnly "com.github.spotbugs:spotbugs-annotations:$spotbugsVersion"
+    compileOnly "org.jetbrains:annotations:$annotationsVersion"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+}
+
+jar {
+    from {
+        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+}

@@ -1,4 +1,4 @@
-package com.mahendran.kstreams;
+package com.mahendran.kafka.streams;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.jetbrains.annotations.NotNull;
 
-final class KafkaConfig {
+public final class KafkaConfig {
 
   private static final String LOCAL_BOOTSTRAP = "localhost:9092";
   private static final String LOCAL_SCHEMA_REGISTRY = "http://localhost:8081";
@@ -52,7 +52,7 @@ final class KafkaConfig {
     return defaults;
   }
 
-  enum ClientType {
+  public enum ClientType {
 
     STREAMS(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG),
     PRODUCER(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG),
@@ -63,10 +63,9 @@ final class KafkaConfig {
     ClientType(String bootstrapConfig) {
       this.bootstrapConfig = bootstrapConfig;
     }
-
   }
 
-  enum Cluster {
+  public enum Cluster {
     LOCAL(LOCAL_BOOTSTRAP, LOCAL_SCHEMA_REGISTRY);
 
     public String getBootstrap() {
@@ -85,5 +84,4 @@ final class KafkaConfig {
       this.schemaRegistry = schemaRegistry;
     }
   }
-
 }

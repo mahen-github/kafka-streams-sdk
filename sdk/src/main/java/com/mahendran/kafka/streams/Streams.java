@@ -1,9 +1,9 @@
-package com.mahendran.kstreams;
+package com.mahendran.kafka.streams;
 
-import com.mahendran.kstreams.KafkaConfig.ClientType;
-import com.mahendran.kstreams.KafkaConfig.Cluster;
-import com.mahendran.kstreams.serde.EventSerde;
-import com.mahendran.kstreams.serde.EventSerdeConfig;
+import com.mahendran.kafka.streams.KafkaConfig.ClientType;
+import com.mahendran.kafka.streams.KafkaConfig.Cluster;
+import com.mahendran.kafka.streams.serde.EventSerde;
+import com.mahendran.kafka.streams.serde.EventSerdeConfig;
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig;

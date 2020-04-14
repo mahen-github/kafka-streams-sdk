@@ -1,6 +1,6 @@
-package com.mahendran.kstreams;
+package com.mahendran.kafka.streams;
 
-import com.mahendran.kstreams.KafkaConfig.Cluster;
+import com.mahendran.kafka.streams.KafkaConfig.Cluster;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;

@@ -1,4 +1,4 @@
-package com.mahendran.kstreams.serde;
+package com.mahendran.kafka.streams.serde;
 
 import java.util.HashMap;
 import java.util.Map;

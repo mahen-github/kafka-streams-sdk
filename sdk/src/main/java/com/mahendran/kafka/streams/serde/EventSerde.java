@@ -1,4 +1,4 @@
-package com.mahendran.kstreams.serde;
+package com.mahendran.kafka.streams.serde;
 
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import java.util.Map;

@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.mahendran.kstreams.KafkaConfig.Cluster;
+import com.mahendran.kafka.streams.KafkaConfig.Cluster;
+import com.mahendran.kafka.streams.Streams;
 import com.mahendran.poc.kafka.Customer;
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
@@ -29,7 +30,7 @@ class StreamsTest {
     assertAll(
         () -> assertEquals("http://localhost:8081", props.get("schema.registry.url")),
         () -> assertEquals("false", props.get("auto.register.schemas").toString()),
-        () -> assertEquals("com.mahendran.kstreams.serde.EventSerde",
+        () -> assertEquals("com.mahendran.kafka.streams.serde.EventSerde",
             props.get("default.value.serde")),
         () -> assertEquals("localhost:9092", props.get("bootstrap.servers")),
         () -> assertEquals("org.apache.kafka.common.serialization.Serdes$StringSerde",
@@ -55,7 +56,7 @@ class StreamsTest {
         () -> assertEquals("SCRAM-SHA-512", props.get("sasl.mechanism")),
         () -> assertEquals("http://localhost:8081", props.get("schema.registry.url")),
         () -> assertEquals("false", props.get("auto.register.schemas").toString()),
-        () -> assertEquals("com.mahendran.kstreams.serde.EventSerde",
+        () -> assertEquals("com.mahendran.kafka.streams.serde.EventSerde",
             props.get("default.value.serde")),
         () -> assertEquals("localhost:9092", props.get("bootstrap.servers")),
         () -> assertEquals("org.apache.kafka.common.serialization.Serdes$StringSerde",
@@ -84,7 +85,7 @@ class StreamsTest {
         () -> assertEquals("SCRAM-SHA-512", props.get("sasl.mechanism")),
         () -> assertEquals("http://localhost:8081", props.get("schema.registry.url")),
         () -> assertEquals("false", props.get("auto.register.schemas").toString()),
-        () -> assertEquals("com.mahendran.kstreams.serde.EventSerde",
+        () -> assertEquals("com.mahendran.kafka.streams.serde.EventSerde",
             props.get("default.value.serde")),
         () -> assertEquals("localhost:9092", props.get("bootstrap.servers")),
         () -> assertEquals("org.apache.kafka.common.serialization.Serdes$StringSerde",

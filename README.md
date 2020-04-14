@@ -1,2 +1,5 @@
-# kafka-streams-sdk
-An out-of-the-boc SDK  provides the kstreams, kafka-consumer and kafka-producer setup
+# Nordstrom Event SDKs
+
+These SDKs ease the development of producers and consumers for business events.
+
+For full details, see the [documentation](https://gitlab.nordstrom.com/events/events-sdk/wikis/home).
