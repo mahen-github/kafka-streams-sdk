@@ -1,5 +1,3 @@
-# Nordstrom Event SDKs
+# Kafka Streams SDK
 
-These SDKs ease the development of producers and consumers for business events.
-
-For full details, see the [documentation](https://gitlab.nordstrom.com/events/events-sdk/wikis/home).
+Kafka Streams SDK provides streams config setup for developers to avoid boilder plate code.
