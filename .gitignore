@@ -1,3 +1,22 @@
-build
+# Ignore Gradle project-specific cache directory
 .gradle
+
+# Ignore Gradle build output directory
+build
+
+# ignore Gradle local properties
+gradle.properties
+
+# Ignore Idea project files
 .idea
+*.iml
+
+target
+out
+
+.DS_Store
+
+# Terraform
+.terraform
+*.tfstate*
+env.tf
