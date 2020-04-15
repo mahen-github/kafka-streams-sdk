@@ -125,7 +125,7 @@ public class Streams {
      *
      * @param accessKey the API access key
      * @param secretKey the API secret key
-     * @return the updated {@code Config} object
+     * @return this class
      */
     @Contract("_, _ -> this")
     public Config withApiKeys(String accessKey, String secretKey) {
@@ -141,6 +141,14 @@ public class Streams {
       return this;
     }
 
+    /**
+     * User defined serde.
+     *
+     * <p>Example serde implementation {@link com.mahendran.kafka.streams.serde.EventSerde}
+     *
+     * @param clazzName Serde class name
+     * @return this class
+     */
     @Contract(" _ -> this")
     public Config withCustomSerde(String clazzName) {
       properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, clazzName);
@@ -149,6 +157,8 @@ public class Streams {
 
     /**
      * Enable the SpecificAvroSerde.
+     *
+     * @return this class
      */
     @Contract(" -> this")
     public Config withSpecificAvroSerde() {
@@ -161,7 +171,7 @@ public class Streams {
     /**
      * Setup multi schema consumer.
      *
-     * @return this
+     * @return this class
      */
     @Contract(" -> this")
     public Config withMultiSchemaConsumerConfig() {
@@ -174,7 +184,7 @@ public class Streams {
     /**
      * Setup multi schema producer.
      *
-     * @return this
+     * @return this class
      */
     @Contract(" -> this")
     public Config withMultiSchemaProducerConfig() {
@@ -187,7 +197,7 @@ public class Streams {
     /**
      * Override application id.
      *
-     * @return this
+     * @return this class
      */
     @Contract("_ -> this")
     public Config withApplicationId(String applicationId) {
@@ -199,7 +209,7 @@ public class Streams {
     /**
      * Override client id.
      *
-     * @return this
+     * @return this class
      */
     @Contract("_ -> this")
     public Config withClientId(String clientId) {
@@ -211,7 +221,7 @@ public class Streams {
     /**
      * Create and set instance of {@link SchemaRegistryClient}.
      *
-     * @return this
+     * @return this class
      */
     @Contract(" -> this")
     public Config withSchemaRegistry() {
