@@ -2,7 +2,6 @@ package com.mahendran.kafka.streams;
 
 import com.mahendran.kafka.streams.KafkaConfig.ClientType;
 import com.mahendran.kafka.streams.KafkaConfig.Cluster;
-import com.mahendran.kafka.streams.serde.EventSerde;
 import com.mahendran.kafka.streams.serde.EventSerdeConfig;
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
@@ -13,6 +12,8 @@ import io.confluent.kafka.schemaregistry.client.security.basicauth.UserInfoCrede
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 import io.confluent.kafka.serializers.subject.TopicRecordNameStrategy;
+import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -64,10 +65,10 @@ public class Streams {
   public static final class Config {
 
     private static final int IDENTITY_MAP_CAPACITY = 5;
+    private final Properties properties;
     private SchemaRegistryClient schemaRegistryClient;
     private String schemaRegistryUrl;
     private RestService restService;
-    private final Properties properties;
 
     /**
      * Constructor that takes user defined properties.
@@ -97,21 +98,21 @@ public class Streams {
       return new Config(KafkaConfig.brokerAndSchemaRegistryConfig(cluster, ClientType.STREAMS));
     }
 
-    private void init(Properties props) {
-      schemaRegistryUrl = props
-          .getProperty(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG);
-      restService = new RestService(schemaRegistryUrl);
-    }
-
     private static Properties streamsConfigDefault() {
       Properties props = new Properties();
       props.put(AbstractKafkaAvroSerDeConfig.AUTO_REGISTER_SCHEMAS, false);
       props.put(StreamsConfig.APPLICATION_ID_CONFIG, UUID.randomUUID().toString());
       props.put(StreamsConfig.CLIENT_ID_CONFIG, UUID.randomUUID().toString());
       props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-      props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, EventSerde.class.getName());
-      props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
+      //In order to use the SpecificAvroSerde, use withSpecificAvroSerde()
+      props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class.getName());
       return props;
+    }
+
+    private void init(Properties props) {
+      schemaRegistryUrl = props
+          .getProperty(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG);
+      restService = new RestService(schemaRegistryUrl);
     }
 
     public Properties getProperties() {
@@ -143,6 +144,17 @@ public class Streams {
     @Contract(" _ -> this")
     public Config withCustomSerde(String clazzName) {
       properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, clazzName);
+      return this;
+    }
+
+    /**
+     * Enable the SpecificAvroSerde.
+     */
+    @Contract(" -> this")
+    public Config withSpecificAvroSerde() {
+      properties
+          .put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class.getName());
+      properties.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
       return this;
     }
 

@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.mahendran.kafka.streams.KafkaConfig.Cluster;
 import com.mahendran.kafka.streams.Streams;
-import com.mahendran.poc.kafka.Customer;
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
@@ -19,9 +18,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.avro.Schema;
 import org.junit.jupiter.api.Test;
 
 class StreamsTest {
+
+  private static Schema getSchema() {
+    return new Schema.Parser().parse(
+        "{\"namespace\":\"com.mahendran.poc.kafka\",\"name\":\"Customer\",\"type\":\"record\","
+            + "\"fields\":[{\"name\":\"id\",\"type\":\"string\"}]}");
+  }
 
   @Test
   void properties_withDefault() {
@@ -30,7 +36,7 @@ class StreamsTest {
     assertAll(
         () -> assertEquals("http://localhost:8081", props.get("schema.registry.url")),
         () -> assertEquals("false", props.get("auto.register.schemas").toString()),
-        () -> assertEquals("com.mahendran.kafka.streams.serde.EventSerde",
+        () -> assertEquals("io.confluent.kafka.streams.serdes.avro.GenericAvroSerde",
             props.get("default.value.serde")),
         () -> assertEquals("localhost:9092", props.get("bootstrap.servers")),
         () -> assertEquals("org.apache.kafka.common.serialization.Serdes$StringSerde",
@@ -56,7 +62,7 @@ class StreamsTest {
         () -> assertEquals("SCRAM-SHA-512", props.get("sasl.mechanism")),
         () -> assertEquals("http://localhost:8081", props.get("schema.registry.url")),
         () -> assertEquals("false", props.get("auto.register.schemas").toString()),
-        () -> assertEquals("com.mahendran.kafka.streams.serde.EventSerde",
+        () -> assertEquals("io.confluent.kafka.streams.serdes.avro.GenericAvroSerde",
             props.get("default.value.serde")),
         () -> assertEquals("localhost:9092", props.get("bootstrap.servers")),
         () -> assertEquals("org.apache.kafka.common.serialization.Serdes$StringSerde",
@@ -85,7 +91,7 @@ class StreamsTest {
         () -> assertEquals("SCRAM-SHA-512", props.get("sasl.mechanism")),
         () -> assertEquals("http://localhost:8081", props.get("schema.registry.url")),
         () -> assertEquals("false", props.get("auto.register.schemas").toString()),
-        () -> assertEquals("com.mahendran.kafka.streams.serde.EventSerde",
+        () -> assertEquals("io.confluent.kafka.streams.serdes.avro.GenericAvroSerde",
             props.get("default.value.serde")),
         () -> assertEquals("localhost:9092", props.get("bootstrap.servers")),
         () -> assertEquals("org.apache.kafka.common.serialization.Serdes$StringSerde",
@@ -123,11 +129,11 @@ class StreamsTest {
   }
 
   @Test
-  void properties_setSchemaRegistryClient() throws IOException, RestClientException {
-    var streams = new Streams.Config(Cluster.LOCAL);
+  void properties_WithSchemaRegistryClient() throws IOException, RestClientException {
+    var streams = new Streams.Config(Cluster.LOCAL).withSchemaRegistry();
     MockSchemaRegistryClient client = new MockSchemaRegistryClient();
-    client.register("subject1", Customer.getClassSchema());
-    client.register("subject2", Customer.getClassSchema());
+    client.register("subject1", getSchema());
+    client.register("subject2", getSchema());
     streams.setSchemaRegistryClient(client);
     Properties props = streams.getProperties();
     assertEquals("http://localhost:8081", props.get("schema.registry.url"));
@@ -136,11 +142,12 @@ class StreamsTest {
   }
 
   @Test
-  void properties_WithSchemaRegistryClient() throws IOException, RestClientException {
-    var streams = new Streams.Config(Cluster.LOCAL).withSchemaRegistry();
+  void properties_setSchemaRegistryClient() throws IOException, RestClientException {
+
+    var streams = new Streams.Config(Cluster.LOCAL);
     MockSchemaRegistryClient client = new MockSchemaRegistryClient();
-    client.register("subject1", Customer.getClassSchema());
-    client.register("subject2", Customer.getClassSchema());
+    client.register("subject1", getSchema());
+    client.register("subject2", getSchema());
     streams.setSchemaRegistryClient(client);
     Properties props = streams.getProperties();
     assertEquals("http://localhost:8081", props.get("schema.registry.url"));

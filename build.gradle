@@ -7,7 +7,7 @@ buildscript {
             url = 'https://packages.confluent.io/maven/'
         }
         maven {
-            url = 'http://repo.maven.apache.org/maven2'
+            url = 'https://repo.maven.apache.org/maven2'
         }
     }
     dependencies {
@@ -29,11 +29,11 @@ plugins {
 }
 
 ext {
+    //Kafka Version
     confluentVersion = '5.4.1'
     kafkaVersion = '2.4.1'
     kstreamsVersion = '2.4.1'
 
-    //NAP dependencies
     //Coding standards
     annotationsVersion = '18.0.0'
     checkstyleVersion = '8.24'
@@ -67,28 +67,25 @@ subprojects {
     apply plugin: "com.commercehub.gradle.plugin.avro-base"
     apply plugin: "com.commercehub.gradle.plugin.avro"
     apply plugin: "com.github.imflog.kafka-schema-registry-gradle-plugin"
-    group 'com.mahendran.kafka.streams'
-    version '1.0-SNAPSHOT'
-
 
     group 'com.mahendran.kafka.streams'
     version '1.0-SNAPSHOT'
 
     sourceCompatibility = JavaVersion.VERSION_11
 
-
     repositories {
         mavenCentral()
         maven {
-            url "http://packages.confluent.io/maven/"
+            url "https://packages.confluent.io/maven/"
         }
     }
     checkstyle {
+        configFile = new File(rootDir, "checkstyle/checkstyle.xml")
         toolVersion = "$checkstyleVersion"
         ignoreFailures = false
         showViolations = true
         maxWarnings = 0
-        configProperties = ["suppressionFile": project(':').file('config/checkstyle/suppressions.xml')]
+        configProperties = ["suppressionFile": project(':').file('checkstyle/suppressions.xml')]
     }
 
     tasks.withType(com.github.spotbugs.SpotBugsTask) {
@@ -120,7 +117,7 @@ subprojects {
     test.finalizedBy jacocoTestReport
 
     versionFile {
-        file = new File("$buildDir/generated-resources", "version.properties")
+        file = file("$buildDir/generated-resources/version.properties")
     }
 
     sourceSets {
