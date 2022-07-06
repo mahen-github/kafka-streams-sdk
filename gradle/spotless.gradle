@@ -1,0 +1,17 @@
+apply plugin: 'com.diffplug.spotless'
+
+spotless {
+    format 'misc', {
+        target '*.gradle', 'gradle/*.gradle', '*.md', '.gitignore', '*.yml', '*.properties', 'terraform/*.tf'
+        indentWithSpaces()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    java {
+        googleJavaFormat('1.13.0')
+        trimTrailingWhitespace()
+        endWithNewline()
+        removeUnusedImports()
+    }
+}
+compileJava.dependsOn 'spotlessApply'

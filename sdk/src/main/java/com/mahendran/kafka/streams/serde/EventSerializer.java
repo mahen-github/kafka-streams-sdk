@@ -17,9 +17,7 @@ public class EventSerializer<T extends SpecificRecordBase & SpecificRecord>
     this.inner = new KafkaAvroSerializer();
   }
 
-  /**
-   * For testing purposes only.
-   */
+  /** For testing purposes only. */
   EventSerializer(final SchemaRegistryClient client) {
     EventSerdeConfig.withProducerConfig(
         Map.of(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "test:8081"));
@@ -35,5 +33,4 @@ public class EventSerializer<T extends SpecificRecordBase & SpecificRecord>
   public byte[] serialize(final String topic, final T record) {
     return inner.serialize(topic, record);
   }
-
 }

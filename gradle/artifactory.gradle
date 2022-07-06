@@ -1,0 +1,17 @@
+apply plugin: 'com.jfrog.artifactory'
+
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"
+    publish {
+        repository {
+            repoKey = "gradle-local"
+            username = "${artifactory_user}"
+            password = "${artifactory_api_key}"
+            maven = true
+        }
+        defaults {
+            publications("mavenJava")
+            publishArtifacts = true
+        }
+    }
+}

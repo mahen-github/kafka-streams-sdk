@@ -1,0 +1,22 @@
+apply plugin: "com.github.spotbugs"
+
+spotbugs {
+    toolVersion = '4.2.0'
+    ignoreFailures = false
+    showProgress = true
+    excludeFilter = file("$project.rootDir/spotbugs_exclude.xml")
+}
+
+spotbugsMain {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+
+spotbugsTest {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}

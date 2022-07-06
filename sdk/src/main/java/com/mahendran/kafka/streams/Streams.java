@@ -34,6 +34,15 @@ public class Streams {
     this.config = config;
   }
 
+  /**
+   * Get the {@link SchemaRegistryClient} instance.
+   *
+   * @return SchemaRegistryClient
+   */
+  public SchemaRegistryClient getSchemaRegistryClient() {
+    return config.getSchemaRegistryClient();
+  }
+
   public Config getConfig() {
     return config;
   }
@@ -44,20 +53,21 @@ public class Streams {
    * @param topology topology for streams
    * @return this class
    */
-  public Streams withTopology(@NotNull Topology topology) {
+  public Streams setTopology(@NotNull Topology topology) {
     this.topology = topology;
     return this;
   }
 
   /**
-   * Creates  {@link KafkaStreams} instance with the given {@link Topology topology}.
+   * Creates {@link KafkaStreams} instance with the given {@link Topology}.
    *
-   * @return {@link KafkaStreams}
+   * @return KafkaStreams
    */
   public KafkaStreams createStreams() {
-    Objects.requireNonNull(topology,
+    Objects.requireNonNull(
+        topology,
         "internal error: cannot build empty topology. "
-            + "Use \"withTopology\" method to set the topology.");
+            + "Use \"setTopology\" method to set the topology.");
     KafkaStreams streams = new KafkaStreams(topology, config.properties);
     return streams;
   }
@@ -67,7 +77,6 @@ public class Streams {
     private static final int IDENTITY_MAP_CAPACITY = 5;
     private final Properties properties;
     private SchemaRegistryClient schemaRegistryClient;
-    private String schemaRegistryUrl;
     private RestService restService;
 
     /**
@@ -78,7 +87,7 @@ public class Streams {
     public Config(@NotNull Cluster cluster) {
       properties = new Properties();
       properties.putAll(streamsConfigDefault());
-      properties.putAll(consumerConfigFor(cluster).getProperties());
+      properties.putAll(streamsClusterConfig(cluster).getProperties());
       init(properties);
     }
 
@@ -94,7 +103,7 @@ public class Streams {
       init(properties);
     }
 
-    private static Config consumerConfigFor(Cluster cluster) {
+    private static Config streamsClusterConfig(Cluster cluster) {
       return new Config(KafkaConfig.brokerAndSchemaRegistryConfig(cluster, ClientType.STREAMS));
     }
 
@@ -104,14 +113,14 @@ public class Streams {
       props.put(StreamsConfig.APPLICATION_ID_CONFIG, UUID.randomUUID().toString());
       props.put(StreamsConfig.CLIENT_ID_CONFIG, UUID.randomUUID().toString());
       props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-      //In order to use the SpecificAvroSerde, use withSpecificAvroSerde()
+      // In order to use the SpecificAvroSerde, use withSpecificAvroSerde()
       props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class.getName());
       return props;
     }
 
     private void init(Properties props) {
-      schemaRegistryUrl = props
-          .getProperty(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG);
+      String schemaRegistryUrl =
+          properties.getProperty(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG);
       restService = new RestService(schemaRegistryUrl);
     }
 
@@ -162,8 +171,8 @@ public class Streams {
      */
     @Contract(" -> this")
     public Config withSpecificAvroSerde() {
-      properties
-          .put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class.getName());
+      properties.put(
+          StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class.getName());
       properties.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
       return this;
     }
@@ -175,9 +184,11 @@ public class Streams {
      */
     @Contract(" -> this")
     public Config withMultiSchemaConsumerConfig() {
-      properties.putAll(EventSerdeConfig
-          .withConsumerConfig(Map.of(AbstractKafkaAvroSerDeConfig.VALUE_SUBJECT_NAME_STRATEGY,
-              TopicRecordNameStrategy.class.getName())));
+      properties.putAll(
+          EventSerdeConfig.withConsumerConfig(
+              Map.of(
+                  AbstractKafkaAvroSerDeConfig.VALUE_SUBJECT_NAME_STRATEGY,
+                  TopicRecordNameStrategy.class.getName())));
       return this;
     }
 
@@ -188,9 +199,11 @@ public class Streams {
      */
     @Contract(" -> this")
     public Config withMultiSchemaProducerConfig() {
-      properties.putAll(EventSerdeConfig
-          .withProducerConfig(Map.of(AbstractKafkaAvroSerDeConfig.VALUE_SUBJECT_NAME_STRATEGY,
-              TopicRecordNameStrategy.class.getName())));
+      properties.putAll(
+          EventSerdeConfig.withProducerConfig(
+              Map.of(
+                  AbstractKafkaAvroSerDeConfig.VALUE_SUBJECT_NAME_STRATEGY,
+                  TopicRecordNameStrategy.class.getName())));
       return this;
     }
 
@@ -221,22 +234,9 @@ public class Streams {
     /**
      * Create and set instance of {@link SchemaRegistryClient}.
      *
-     * @return this class
-     */
-    @Contract(" -> this")
-    public Config withSchemaRegistry() {
-      Objects.requireNonNull(schemaRegistryUrl, "must provide the schema registry url");
-      if (schemaRegistryClient == null) {
-        schemaRegistryClient = new CachedSchemaRegistryClient(restService, IDENTITY_MAP_CAPACITY);
-      }
-      return this;
-    }
-
-    /**
-     * Create and set instance of {@link SchemaRegistryClient}.
-     *
      * @return Instance of schema registry client
      */
+    @Contract(" -> _")
     public SchemaRegistryClient getSchemaRegistryClient() {
       if (schemaRegistryClient == null) {
         schemaRegistryClient = new CachedSchemaRegistryClient(restService, IDENTITY_MAP_CAPACITY);
@@ -253,6 +253,11 @@ public class Streams {
       schemaRegistryClient = client;
     }
 
+    /**
+     * Build and return the {@link Streams}.
+     *
+     * @return Streams
+     */
     public Streams build() {
       return new Streams(this);
     }

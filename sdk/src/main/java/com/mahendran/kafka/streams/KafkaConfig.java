@@ -29,9 +29,13 @@ public final class KafkaConfig {
    * @return properties for Proton cluster connection
    */
   @NotNull
-  static Map<String, String> brokerAndSchemaRegistryConfig(Cluster cluster, ClientType configType) {
-    return Map.of(configType.bootstrapConfig, cluster.bootstrap,
-        AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, cluster.schemaRegistry);
+  public static Map<String, String> brokerAndSchemaRegistryConfig(
+      Cluster cluster, ClientType configType) {
+    return Map.of(
+        configType.bootstrapConfig,
+        cluster.getBootstrap(),
+        AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+        cluster.getSchemaRegistry());
   }
 
   /**
@@ -40,20 +44,20 @@ public final class KafkaConfig {
    * @return properties for secure connection
    */
   @NotNull
-  static Map<String, String> secureConfig(String accessKey, String secretKey) {
+  public static Map<String, String> secureConfig(String accessKey, String secretKey) {
     Map<String, String> defaults = new HashMap<>();
 
     defaults.put(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, SASL_SSL);
     defaults.put(SaslConfigs.SASL_MECHANISM, SCRAM_SHA_512);
     defaults.put(AbstractKafkaAvroSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, SASL_INHERIT);
-    defaults.put(SaslConfigs.SASL_JAAS_CONFIG,
+    defaults.put(
+        SaslConfigs.SASL_JAAS_CONFIG,
         String.format(SASL_JAAS_CONFIG_TEMPLATE, accessKey, secretKey));
 
     return defaults;
   }
 
   public enum ClientType {
-
     STREAMS(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG),
     PRODUCER(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG),
     CONSUMER(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
@@ -66,15 +70,7 @@ public final class KafkaConfig {
   }
 
   public enum Cluster {
-    LOCAL(LOCAL_BOOTSTRAP, LOCAL_SCHEMA_REGISTRY);
-
-    public String getBootstrap() {
-      return bootstrap;
-    }
-
-    public String getSchemaRegistry() {
-      return schemaRegistry;
-    }
+    LOCAL(KafkaConfig.LOCAL_BOOTSTRAP, KafkaConfig.LOCAL_SCHEMA_REGISTRY);
 
     private final String bootstrap;
     private final String schemaRegistry;
@@ -82,6 +78,14 @@ public final class KafkaConfig {
     Cluster(String bootstrap, String schemaRegistry) {
       this.bootstrap = bootstrap;
       this.schemaRegistry = schemaRegistry;
+    }
+
+    public String getBootstrap() {
+      return bootstrap;
+    }
+
+    public String getSchemaRegistry() {
+      return schemaRegistry;
     }
   }
 }

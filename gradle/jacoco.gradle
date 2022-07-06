@@ -1,0 +1,30 @@
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "$jacocoVersion"
+}
+
+jacocoTestReport {
+    reports.html
+    reports.html.destination file("${buildDir}/reports/jacoco/html")
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.10
+            }
+        }
+    }
+}
+
+test.finalizedBy(
+        project.tasks.jacocoTestCoverageVerification,
+        project.tasks.jacocoTestReport
+)
+
+check.dependsOn {
+    project.tasks.jacocoTestCoverageVerification
+    project.tasks.jacocoTestReport
+}

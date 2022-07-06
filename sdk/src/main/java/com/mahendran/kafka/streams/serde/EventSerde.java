@@ -22,32 +22,24 @@ public class EventSerde<T extends SpecificRecordBase & SpecificRecord> implement
 
   final Serde<T> inner;
 
-  /**
-   * Default constructor required by KafkaAvroDeserializer.
-   */
+  /** Default constructor required by KafkaAvroDeserializer. */
   public EventSerde() {
-    inner = Serdes.serdeFrom(
-        new EventSerializer<>(),
-        new EventDeserializer<>());
+    inner = Serdes.serdeFrom(new EventSerializer<>(), new EventDeserializer<>());
   }
 
-  /**
-   * For testing purposes only.
-   */
+  /** For testing purposes only. */
   public EventSerde(SchemaRegistryClient client) {
     if (client == null) {
       throw new IllegalArgumentException("schema registry client must not be null");
     }
-    inner = Serdes.serdeFrom(
-        new EventSerializer<>(client),
-        new EventDeserializer<>(client));
+    inner = Serdes.serdeFrom(new EventSerializer<>(client), new EventDeserializer<>(client));
   }
 
   @Override
   public void configure(Map<String, ?> props, boolean isKey) {
     Map<String, Object> properties = new HashMap<>(props);
     properties.putAll(props);
-    //Enable the specific avro serde
+    // Enable the specific avro serde
     properties.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
     inner.serializer().configure(properties, isKey);
     inner.deserializer().configure(properties, isKey);
@@ -69,4 +61,3 @@ public class EventSerde<T extends SpecificRecordBase & SpecificRecord> implement
     inner.deserializer().close();
   }
 }
-

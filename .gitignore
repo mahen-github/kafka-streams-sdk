@@ -4,9 +4,6 @@
 # Ignore Gradle build output directory
 build
 
-# ignore Gradle local properties
-gradle.properties
-
 # Ignore Idea project files
 .idea
 *.iml

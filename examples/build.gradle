@@ -1,5 +1,8 @@
-
+plugins {
+    id 'application'
+}
 dependencies {
+    implementation project(':sdk')
     implementation "io.confluent:kafka-avro-serializer:$confluentVersion"
     implementation "io.confluent:kafka-streams-avro-serde:$confluentVersion"
     implementation "org.apache.kafka:kafka-clients:$kstreamsVersion"
@@ -19,3 +22,8 @@ dependencies {
     testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 }
+
+application {
+    mainClassName = 'com.mahendran.kafka.streams.examples.App'
+}
+

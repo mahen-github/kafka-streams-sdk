@@ -18,9 +18,7 @@ public class EventDeserializer<T extends SpecificRecordBase & SpecificRecord>
     inner = new KafkaAvroDeserializer();
   }
 
-  /**
-   * For testing purposes only.
-   */
+  /** For testing purposes only. */
   EventDeserializer(final SchemaRegistryClient client) {
     EventSerdeConfig.withConsumerConfig(
         Map.of(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, client));
@@ -35,7 +33,7 @@ public class EventDeserializer<T extends SpecificRecordBase & SpecificRecord>
   @Override
   @SuppressWarnings(value = "unchecked")
   public T deserialize(String topic, byte[] bytes) {
-    return (T) inner
-        .deserialize(topic, bytes, (Schema) EventSerdeConfig.producerConfiguration.get(topic));
+    return (T)
+        inner.deserialize(topic, bytes, (Schema) EventSerdeConfig.producerConfiguration.get(topic));
   }
 }

@@ -1,0 +1,9 @@
+apply plugin: "com.github.davidmc24.gradle.plugin.avro-base"
+apply plugin: "com.github.davidmc24.gradle.plugin.avro"
+
+avro {
+    createSetters = true
+    fieldVisibility = 'private'
+    stringType = 'CharSequence'
+    enableDecimalLogicalType = true
+}

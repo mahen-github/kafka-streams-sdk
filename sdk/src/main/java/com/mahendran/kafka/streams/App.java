@@ -9,20 +9,15 @@ public class App {
 
   private static Streams streams;
 
-  /**
-   * main method to run the streams.
-   */
+  /** main method to run the streams. */
   public static void main(String[] args) {
 
     streams = new Streams.Config(Cluster.LOCAL).build();
-    KafkaStreams streams = App.streams
-        .withTopology(getTopology())
-        .createStreams();
+    KafkaStreams streams = App.streams.setTopology(getTopology()).createStreams();
     streams.start();
     streams.cleanUp();
 
     Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
-
   }
 
   private static Topology getTopology() {
@@ -30,5 +25,4 @@ public class App {
     builder.stream("topic").to("");
     return builder.build(streams.getConfig().getProperties());
   }
-
 }
