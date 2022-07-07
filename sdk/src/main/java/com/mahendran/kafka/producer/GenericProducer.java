@@ -1,15 +1,11 @@
 package com.mahendran.kafka.producer;
 
 import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.AUTO_REGISTER_SCHEMAS;
+import static io.confluent.kafka.serializers.KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.MAX_REQUEST_SIZE_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
 
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.rest.RestService;
-import io.confluent.kafka.schemaregistry.client.security.basicauth.BasicAuthCredentialProvider;
-import io.confluent.kafka.schemaregistry.client.security.basicauth.SaslBasicAuthCredentialProvider;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -32,36 +28,42 @@ import org.jetbrains.annotations.NotNull;
  * org.apache.avro.specific.SpecificRecordBase}, {@link GenericRecord}.
  */
 public class GenericProducer<K, V> implements AutoCloseable {
-  private  Properties properties;
-  private SchemaRegistryClient schemaRegistryClient;
-  private RestService restService;
 
-  public Properties getProperties() {
-    return properties;
+  private final KafkaProducer<K, V> producer;
+  private final Properties properties;
+  private Properties defaultProperties;
+
+  /**
+   * Instantiate producer with the producer properties.
+   *
+   * <p> User are expected to provide properties with BootStrap Server ad Schema Registry URL.
+   *
+   * @param properties Kafka Producer properties
+   */
+  public GenericProducer(Properties properties) {
+    //get the default props
+    this.properties = new Properties(defaultProperties());
+    //add user provided props. User provided config will override the default props
+    this.properties.putAll(properties);
+    producer = new KafkaProducer<>(properties);
   }
 
-  public SchemaRegistryClient getSchemaRegistryClient() {
-    Objects.requireNonNull(schemaRegistryClient, "schemaRegistryClient is not initialized");
-    return schemaRegistryClient;
-  }
-
-  public RestService getRestService() {
-    return restService;
-  }
-
-  public KafkaProducer<K, V> getProducer() {
-    return producer;
-  }
-
-  private KafkaProducer<K, V> producer;
-
-  public void withApiKeys(String accessKey, String secretKey) {
-    Objects.requireNonNull(accessKey, "accessKey must not be null");
-    Objects.requireNonNull(secretKey, "secretKey must not be null");
-    BasicAuthCredentialProvider provider = new SaslBasicAuthCredentialProvider();
-    provider.configure(Map.of("sasl.jaas.config", String.format("org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";", accessKey, secretKey)));
-    this.restService.setBasicAuthCredentialProvider(provider);
-    this.properties.putAll(secureConfig(accessKey, secretKey));
+  /**
+   * Instantiate producer with the user provided properties, default properties and SASL key and
+   * secret.
+   *
+   * <p> User are expected to provide properties with BootStrap Server ad Schema Registry URL.
+   *
+   * @param properties Kafka Producer properties
+   */
+  public GenericProducer(Properties properties, String accessKey, String secretKey) {
+    //get the default props
+    this.properties = new Properties(defaultProperties());
+    // add SASL
+    this.properties.putAll(withApiKeys(accessKey, secretKey));
+    //add user provided props. User provided config will override the default props
+    this.properties.putAll(properties);
+    producer = new KafkaProducer<>(properties);
   }
 
   @NotNull
@@ -70,70 +72,77 @@ public class GenericProducer<K, V> implements AutoCloseable {
     defaults.put("security.protocol", "SASL_SSL");
     defaults.put("sasl.mechanism", "SCRAM-SHA-512");
     defaults.put("basic.auth.credentials.source", "SASL_INHERIT");
-    defaults.put("sasl.jaas.config", String.format("org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";", accessKey, secretKey));
+    defaults.put("sasl.jaas.config", String.format(
+        "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";",
+        accessKey, secretKey));
     return defaults;
   }
 
+  public Properties getProperties() {
+    return properties;
+  }
+
+  public Properties getDefaultProperties() {
+    return defaultProperties;
+  }
+
+  public KafkaProducer<K, V> getProducer() {
+    return producer;
+  }
+
+  public Properties withApiKeys(String accessKey, String secretKey) {
+    Objects.requireNonNull(accessKey, "accessKey must not be null");
+    Objects.requireNonNull(secretKey, "secretKey must not be null");
+    this.properties.putAll(secureConfig(accessKey, secretKey));
+    this.defaultProperties.putAll(secureConfig(accessKey, secretKey));
+    return defaultProperties;
+  }
+
+  private Properties defaultProperties() {
+    this.defaultProperties = new Properties();
+    defaultProperties.put(AUTO_REGISTER_SCHEMAS, false);
+    defaultProperties.put(SPECIFIC_AVRO_READER_CONFIG, true);
+    defaultProperties.setProperty(KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+    defaultProperties.setProperty(VALUE_SERIALIZER_CLASS_CONFIG,
+        KafkaAvroSerializer.class.getName());
+    defaultProperties.put(MAX_REQUEST_SIZE_CONFIG, 1024 * 1024 * 10); // Messages up to 10 MB
+    return defaultProperties;
+  }
+
   /**
-   * A {@link GenericRecord} kafka producer.
-   *
+   * Publishes a local event with KafkaProducer.
    */
-  public void producer() {
-    var props = new Properties();
-    props.put("auto.register.schemas", false);
-    props.put("application.id", UUID.randomUUID().toString());
-    props.put("client.id", UUID.randomUUID().toString());
-    props.put("specific.avro.reader", true);
-    props.setProperty(KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-    props.setProperty(VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
-    props.put(MAX_REQUEST_SIZE_CONFIG, 1024 * 1024 * 10);
-    props.put(AUTO_REGISTER_SCHEMAS, true);
-    this.properties = new Properties(props);
-    producer = new KafkaProducer<>(props);
-  }
-
-
-  public void withSchemaRegistry(String schemaRegistryUrl ) {
-    Objects.requireNonNull(schemaRegistryUrl, "must provide the schema registry url");
-    this.restService = new RestService(schemaRegistryUrl);
-    if (this.schemaRegistryClient == null) {
-      this.schemaRegistryClient = new CachedSchemaRegistryClient(this.restService, 5);
-    }
-  }
-
-  /** Publishes a local event with KafkaProducer. */
-  void produce(V event, K key, String eventType, String topic, int noOfEvents) {
+  public void produce(V event, K key, String topic) {
     try {
       // TODO: Async threads
-      for (int i = 0; i < noOfEvents; i++) {
-        ProducerRecord<K, V> recordTo = new ProducerRecord<>(topic, key, event);
-        addMessageHeader(recordTo, eventType);
-        producer.send(
-            recordTo,
-            (recordMetadata, exception) -> {
-              if (exception != null) {
-                throw new RuntimeException(
-                    "Failed to produce messages " + ExceptionUtils.getStackTrace(exception),
-                    exception);
-              } else {
-                System.out.println(recordMetadata.offset());
-              }
-            });
-      }
-      producer.flush();
+      ProducerRecord<K, V> recordTo = new ProducerRecord<>(topic, key, event);
+      addMessageHeader(recordTo);
+      producer.send(
+          recordTo,
+          (recordMetadata, exception) -> {
+            if (exception != null) {
+              throw new RuntimeException(
+                  "Failed to produce messages " + ExceptionUtils.getStackTrace(exception),
+                  exception);
+            } else {
+              System.out.println(recordMetadata.offset());
+            }
+          });
     } catch (Exception e) {
       throw new RuntimeException("Failed to produce event: " + ExceptionUtils.getStackTrace(e), e);
     }
   }
 
-  /** Creates a header for the event and sets sample values. */
-  private void addMessageHeader(ProducerRecord<K, V> recordTo, String eventType) {
+  /**
+   * Creates a header for the event and sets sample values.
+   */
+  private void addMessageHeader(ProducerRecord<K, V> recordTo) {
     long timestamp = Instant.now().toEpochMilli();
     var headers = recordTo.headers();
 
     BiConsumer<String, String> addToHeader =
         (key, value) -> headers.add(new RecordHeader(key, value.getBytes(StandardCharsets.UTF_8)));
-    addToHeader.accept("ID", eventType + "-" + Instant.now());
+    addToHeader.accept("ID", UUID.randomUUID().toString());
     addToHeader.accept("APP_ID", "APP_ID");
     addToHeader.accept("EVENT_TIME", Long.toString(timestamp));
     addToHeader.accept("SYSTEM_TIME", Long.toString(timestamp));
@@ -145,4 +154,5 @@ public class GenericProducer<K, V> implements AutoCloseable {
       producer.close();
     }
   }
+
 }

@@ -1,5 +1,6 @@
-
 dependencies {
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "io.confluent:kafka-avro-serializer:$confluentVersion"
     implementation "io.confluent:kafka-streams-avro-serde:$confluentVersion"
     implementation "org.apache.kafka:kafka-clients:$kstreamsVersion"
