@@ -1,5 +1,8 @@
 <FindBugsFilter>
   <Match>
+    <Source name="~.*build/generated-main-avro-java"/>
+  </Match>
+  <Match>
     <Source name="~.*generated-test-avro-java"/>
   </Match>
 </FindBugsFilter>

@@ -1,0 +1,12 @@
+@namespace("dev.mahendran.event")
+protocol Customer {
+
+	record Customer {
+		string customerId;
+		int age = 0;
+		string firstName;
+		union{null, string} middleName = null;
+		string lastName;
+		timestamp_ms eventTime;
+	}
+}

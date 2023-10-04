@@ -7,4 +7,5 @@
 <suppressions>
   <suppress checks="Javadoc" files="[/\\]*/src/test[/\\]"/>
   <suppress checks=".*" files="[/\\]*/build/generated-test-avro-java[/\\]"/>
+  <suppress checks=".*" files="[/\\]*/build/generated-main-avro-java[/\\]"/>
 </suppressions>

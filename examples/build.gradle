@@ -1,3 +1,4 @@
+
 plugins {
     id 'application'
 }
@@ -14,9 +15,6 @@ dependencies {
     implementation "org.apache.logging.log4j:log4j-core:$log4jVersion"
     implementation "org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion"
 
-    compileOnly "com.github.spotbugs:spotbugs-annotations:$spotbugsVersion"
-    compileOnly "org.jetbrains:annotations:$annotationsVersion"
-
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
@@ -24,6 +22,5 @@ dependencies {
 }
 
 application {
-    mainClassName = 'com.mahendran.kafka.streams.examples.App'
+    mainClassName = 'dev.mahendran.kafka.streams.examples.App'
 }
-

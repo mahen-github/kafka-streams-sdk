@@ -1,51 +1,26 @@
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-        maven {
-            url = 'https://packages.confluent.io/maven/'
-        }
-        maven {
-            url = 'https://repo.maven.apache.org/maven2'
-        }
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.google.guava:guava:28.1-jre'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.9.0'
-        classpath 'io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE'
-        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
-        classpath "com.commercehub.gradle.plugin:gradle-avro-plugin:0.17.0"
-        classpath "com.github.imflog:kafka-schema-registry-gradle-plugin:0.9.0"
-    }
-}
-
 plugins {
     id 'java-library'
     id "maven-publish"
-    id "com.github.spotbugs" version "4.8.0"
-    id 'net.nemerosa.versioning' version '2.14.0'
-    id "com.jfrog.artifactory" version "4.13.0"
-    id 'com.diffplug.spotless' version '6.1.0'
-    id "com.github.davidmc24.gradle.plugin.avro" version "1.2.0"
+    id "com.github.spotbugs-base"
+    id "com.diffplug.spotless"
+    id 'net.nemerosa.versioning'
+    id 'com.jfrog.artifactory'
+    id 'com.github.davidmc24.gradle.plugin.avro'
 }
 
 allprojects {
     apply plugin: 'java-library'
     apply from: "$rootDir/gradle/artifactory.gradle"
-//    apply from: "$rootDir/gradle/spotless.gradle"
-}
-
-subprojects {
-
-    apply plugin: 'maven-publish'
+    apply from: "$rootDir/gradle/spotless.gradle"
     apply from: "$rootDir/gradle/spotbugs.gradle"
     apply from: "$rootDir/gradle/jacoco.gradle"
     apply from: "$rootDir/gradle/checkstyle.gradle"
     apply from: "$rootDir/gradle/avro.gradle"
+}
 
-    group 'com.mahendran.kafka.streams'
+subprojects {
+    apply plugin: 'maven-publish'
+    group 'dev.mahendran.kafka'
     version '1.0-SNAPSHOT'
 
     sourceCompatibility = JavaVersion.VERSION_11
@@ -67,19 +42,6 @@ subprojects {
         testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     }
 
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-        maven {
-            url = 'https://packages.confluent.io/maven/'
-        }
-        maven {
-            url = 'https://repo.maven.apache.org/maven2'
-        }
-        mavenCentral()
-    }
-
     test {
         useJUnitPlatform()
         testLogging {
@@ -89,4 +51,5 @@ subprojects {
             showStandardStreams = true
         }
     }
+
 }
